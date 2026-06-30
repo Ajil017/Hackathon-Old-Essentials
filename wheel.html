@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin the Wheel Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #5332ac 100%); 
+            min-height: 100vh; 
+            position: relative; 
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(138,43,226,0.5)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="30" cy="30" r="20" fill="url(%23a)"/><circle cx="70" cy="70" r="15" fill="url(%23a)"/><circle cx="50" cy="80" r="10" fill="url(%23a)"/></svg>') no-repeat center center;
+            background-size: 300% 300%;
+            animation: float 20s ease-in-out infinite alternate;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-50px) rotate(180deg); }
+        }
+        .wheel-container { 
+            position: relative; 
+            width: 700px; 
+            height: 700px; 
+            margin: 20px auto; 
+            border-radius: 100%; 
+            overflow: hidden;
+        }
+        .pointer { 
+            position: absolute; 
+            top: -15px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 0; 
+            height: 0; 
+            border-left: 20px solid transparent; 
+            border-right: 20px solid transparent; 
+            border-top: 10px solid #ffd700; 
+            z-index: 10; 
+        }
+        .pointer:before { 
+            content: ''; 
+            position: absolute; 
+            top: 70px; 
+            left: -20px; 
+            width: 0; 
+            height: 0; 
+            border-left: 20px solid transparent; 
+            border-right: 20px solid transparent; 
+            border-top: 10px solid #000; 
+        }
+        #wheel { 
+            cursor: pointer; 
+            transition: transform 4s cubic-bezier(0.23, 1, 0.32, 1); 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+        }  
+        
+        .nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px; 
+            background: linear-gradient(45deg, #0f0f23, #1a1a2e); 
+            color: white; 
+            border-radius: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0); 
+            border: 1px solid rgba(255,255,255,0.2); 
+        }
+        .spin-btn { 
+            background: linear-gradient(45deg, #ffec19, #ff9900, #ff5f00); 
+            color: #000; 
+            font-weight: bold; 
+            padding: 15px 30px; 
+            border-radius: 30px; 
+            transition: all 0.3s; 
+            border: 2px solid #fff; 
+            box-shadow: 0 5px 15px rgba(255,204,0,0.4); 
+        }
+        .spin-btn:hover { transform: scale(1.1); box-shadow: 0 8px 20px rgba(255,204,0,0.6); filter: brightness(1.1); }
+        .remove-btn { 
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #dc143c); 
+            color: white; 
+            padding: 12px 25px; 
+            border-radius: 15px; 
+            transition: all 0.3s; 
+            border: 2px solid #fff; 
+            box-shadow: 0 5px 15px rgba(255,107,107,0.5); 
+        }
+        .remove-btn:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(255,107,107,0.7); }
+        .result { 
+            font-size: 1.5rem; 
+            color: #ffec19; 
+            text-shadow: 0 0 15px rgba(255,236,25,0.7); 
+            animation: bounceIn 0.6s ease-out; 
+            margin-top: 15px; 
+        }
+        @keyframes bounceIn { 
+            0% { opacity: 0; transform: scale(0.3); } 
+            50% { opacity: 1; transform: scale(1.05); } 
+            70% { transform: scale(0.9); } 
+            100% { opacity: 1; transform: scale(1); } 
+        }
+        .option-card { 
+            background: rgba(255,255,255,0.05); 
+            backdrop-filter: blur(20px); 
+            border-radius: 20px; 
+            padding: 20px; 
+            margin-top: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .option-item { 
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); 
+            padding: 10px; 
+            text-align: center; 
+            color: white; 
+            border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            transition: all 0.3s; 
+        }
+        .option-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .notif { animation: slideDown 0.5s; }
+        @keyframes slideDown { from { transform: translateY(-100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .particle { 
+            position: absolute; 
+            width: 10px; 
+            height: 10px; 
+            background: radial-gradient(circle, rgba(138,43,226,0.8) 0%, transparent 70%); 
+            border-radius: 50%; 
+            animation: particleFloat 6s linear infinite; 
+        }
+        @keyframes particleFloat { 
+            0% { transform: translateY(100vh) scale(0); opacity: 1; } 
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; } 
+        }
+    </style>
+</head>
+<body class="text-white overflow-x-hidden">
+
+     <!-- Static image top-right -->
+    <div class="fixed top-4 right-4 z-50">
+    <img src="cclogo.png" alt="Logo" class="w-20 h-20 object-contain shadow-lg rounded-full border-2 border-white/50">
+    </div>
+        <!-- Particle Effects -->
+    <div id="particles" class="fixed w-full h-full pointer-events-none overflow-hidden"></div>
+    <div class="container mx-auto p-8 max-w-5xl animate-fade-in">
+        <div class="nav notif">
+            <h1 class="text-3xl font-bold flex items-center"><i class="fas fa-spinner fa-pulse mr-3 text-yellow-300"></i> Epic Spin the Wheel Adventure</h1>
+            <div class="flex gap-4">
+                <a href="index.html" class="flex items-center px-6 py-3 bg-indigo-700 text-white rounded-lg hover:bg-indigo-600 transition transform hover:scale-105 shadow-lg border border-indigo-500/30"><i class="fas fa-home mr-2"></i> Home</a>
+                <a href="add-options.html" class="flex items-center px-6 py-3 bg-white text-indigo-600 rounded-lg hover:bg-gray-200 transition transform hover:scale-105 shadow-lg"><i class="fas fa-plus mr-2"></i> Manage Options</a>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-white/10 to-gray-100/5 backdrop-blur-2xl rounded-3xl p-10 shadow-2xl border border-white/20 flex flex-col md:flex-row items-center justify-center gap-10 w-full">
+        <!-- Wheel -->
+        <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="700" height="700" ></canvas>
+        </div>
+
+        <!-- Controls on the right -->
+        <div class="flex flex-col items-center space-y-6 md:items-start">
+            <button id="spin" class="spin-btn text-xl shadow-2xl"><i class="fas fa-play mr-2"></i>Spin the Wheel!</button>
+            <div id="result" class="result"></div>
+            <button id="remove" class="remove-btn shadow-lg" style="display: none;"><i class="fas fa-trash mr-2"></i>Remove This Option</button>
+        </div>
+        </div>
+
+        <div class="option-card">
+            <h2 class="text-2xl font-semibold mb-6 flex items-center text-yellow-300"><i class="fas fa-list mr-3"></i> Current Stellar Options</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="option-list">
+                <!-- Dynamic options will go here -->
+            </div>
+        </div>
+    </div>
+    <script>
+        // Elements
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const resultDiv = document.getElementById('result');
+        const removeBtn = document.getElementById('remove');
+        const spinBtn = document.getElementById('spin');
+        const optionList = document.getElementById('option-list');
+
+        // Data
+        let defaultOptions = ['Pizza Party','Burger Feast','Salad Bowl','Ice Cream Cone','Cake Slice'];
+        let options = JSON.parse(localStorage.getItem('wheelOptions')) || defaultOptions.slice();
+        let isSpinning = false;
+        let currentRotation = 0; // degrees (keeps small by %360 later)
+        let landedIndex = -1;
+
+        // Draw wheel (improved label placement & flipping for readability)
+        function drawWheel(){
+        const numOptions = options.length;
+        const anglePerOption = (2 * Math.PI) / numOptions;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+
+        const radius = 300;
+        const centerX = canvas.width/2;
+        const centerY = canvas.height/2;
+        const lightColors = ['#FF8A94','#FFDC9E','#FFFF8A','#9CFF9C','#9CCBFF','#C99CFF','#FF9CCF','#FF9C9C'];
+
+        options.forEach((option,index) => {
+            const startAngle = index * anglePerOption - Math.PI/2;
+            const endAngle = (index+1)*anglePerOption - Math.PI/2;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = lightColors[index % lightColors.length];
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Text: rotate to slice center, then draw outward.
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            const textAngle = startAngle + anglePerOption / 2;
+            ctx.rotate(textAngle);
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 16px Arial';
+
+            // If text would be upside-down, flip it so it reads correctly
+            const deg = (textAngle * 180 / Math.PI + 360) % 360;
+            if (deg > 90 && deg < 270) {
+            // flip
+            ctx.rotate(Math.PI);
+            ctx.fillText(option, -radius * 0.68, 0);
+            } else {
+            ctx.fillText(option, radius * 0.68, 0);
+            }
+            ctx.restore();
+        });
+        }
+
+        // UI list
+        function updateOptionList(){
+        optionList.innerHTML = '';
+        options.forEach(opt => {
+            const item = document.createElement('div');
+            item.className = 'option-item';
+            item.textContent = opt;
+            optionList.appendChild(item);
+        });
+        }
+
+        // Particle effect (unchanged)
+        const particlesContainer = document.getElementById('particles') || document.body;
+        function addParticles(){
+        for (let i=0;i<20;i++){
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random()*100 + '%';
+            particle.style.animationDelay = Math.random()*6 + 's';
+            document.body.appendChild(particle);
+            setTimeout(()=>particle.remove(), 6000);
+        }
+        }
+
+        // Read computed rotation (in degrees) from element's transform matrix
+        function getRotationDegrees(elem){
+        const st = window.getComputedStyle(elem);
+        const tr = st.getPropertyValue('transform');
+        if (!tr || tr === 'none') return 0;
+        const values = tr.split('(')[1].split(')')[0].split(',');
+        const a = parseFloat(values[0]);
+        const b = parseFloat(values[1]);
+        const angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+        return (angle < 0) ? angle + 360 : angle;
+        }
+
+        // Spin logic using transitionend for accuracy
+        function spinWheel() {
+        if (isSpinning || options.length === 0) return;
+        isSpinning = true;
+        spinBtn.disabled = true;
+        removeBtn.style.display = 'none';
+        addParticles();
+
+        const numOptions = options.length;
+
+        // Always spin between 3 and 6 full turns
+        const minRotations = 3; 
+        const maxRotations = 6; 
+        const fullTurns = Math.floor(Math.random() * (maxRotations - minRotations + 1)) + minRotations;
+
+        // Add a random stopping offset
+        const randomOffset = Math.random() * 360;
+
+        // Final spin amount (absolute, not relative!)
+        const totalRotation = fullTurns * 360 + randomOffset;
+
+        // Reset transition so we can restart animation cleanly
+        canvas.style.transition = 'none';
+        canvas.style.transform = `rotate(0deg)`;
+
+        // Force browser to apply the reset before starting new spin
+        requestAnimationFrame(() => {
+            canvas.style.transition = 'transform 4s cubic-bezier(0.23, 1, 0.32, 1)';
+            canvas.style.transform = `rotate(${totalRotation}deg)`;
+        });
+
+        // Handle result when animation ends
+        const onTransitionEnd = () => {
+            canvas.removeEventListener('transitionend', onTransitionEnd);
+
+            let rotation = totalRotation % 360;
+            const anglePerOption = 360 / numOptions;
+            const normalized = (360 - rotation) % 360;
+            landedIndex = Math.floor(normalized / anglePerOption);
+
+            resultDiv.innerHTML = `<i class="fas fa-trophy mr-2"></i> Landed on: <strong>${options[landedIndex]}</strong>`;
+            removeBtn.style.display = 'inline-block';
+            isSpinning = false;
+            spinBtn.disabled = false;
+        };
+
+        canvas.addEventListener('transitionend', onTransitionEnd);
+        }
+
+
+        // Remove the landed option
+        function removeLanded(){
+        if (landedIndex !== -1 && options.length > 1) {
+            options.splice(landedIndex, 1);
+            landedIndex = -1;
+            resultDiv.textContent = '';
+            removeBtn.style.display = 'none';
+            drawWheel();
+            updateOptionList();
+            localStorage.setItem('wheelOptions', JSON.stringify(options));
+        } else {
+            alert('Cannot remove when only one option remains.');
+        }
+        }
+
+        // Init
+        drawWheel();
+        updateOptionList();
+
+        // events
+        spinBtn.addEventListener('click', spinWheel);
+        removeBtn.addEventListener('click', removeLanded);
+
+        // expose for debug if needed
+        window._wheelDebug = { getRotationDegrees, canvas, ctx };
+    </script>
+</body>
+</html>
+</content>
+</create_file>
+

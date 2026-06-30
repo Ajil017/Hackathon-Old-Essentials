@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Company Ranking System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+        background: url('home.svg') no-repeat center center fixed;
+        background-size: cover;
+        /* optionally keep a dark overlay by adding a semi-transparent layer */
+        position: relative;
+        min-height: 100vh;
+        color: white;
+        }
+        body::before {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.4); /* dark overlay */
+        pointer-events: none;
+        z-index: 0;
+        }
+        @keyframes backgroundShift {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+        #app {
+            position: relative;
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(14, 14, 14, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+        .top-right-logo {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            width: 150px;   /* adjust size */
+            height: auto;
+            z-index: 1000; /* keep it above other elements */
+        }
+        .top-left-home {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(22, 33, 62, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            font-family: inherit;
+        }
+        .top-left-home:hover {
+            background: linear-gradient(145deg, #8a2be2, #4b0082);
+            color: #ffffff;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(138, 43, 226, 0.5);
+            border-color: rgba(138, 43, 226, 0.5);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            background: linear-gradient(145deg, #8a2be2, #4b0082);
+            color: white;
+            padding: 0.8rem 1.6rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            margin: 0 0.5rem;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(138, 43, 226, 0.7);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .button-container {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        /* Graph container */
+        #graph-container {
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 400px;
+            margin-top: 3rem;
+            position: relative;
+        }
+        .bar-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+        .bar {
+            position: absolute;
+            bottom: 0;
+            width: 100px;
+            background: #FF0000; /* Default to red */
+            border-radius: 0;
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
+            transform-style: preserve-3d;
+            transition: height 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        /* Color variations for each company - bright solid colors */
+        .bar.company0 { background: #FF0000; } /* Bright Red */
+        .bar.company1 { background: #00FF00; } /* Bright Green */
+        .bar.company2 { background: #0000FF; } /* Bright Blue */
+        .bar.company3 { background: #FFFF00; } /* Bright Yellow */
+        .bar.company4 { background: #FFA500; } /* Bright Orange */
+        /* 3D isometric sides */
+        .bar::before, .bar::after {
+            content: "";
+            position: absolute;
+            background: inherit;
+            border-radius: 0;
+            box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        .bar::before {
+            width: 25px;
+            height: 100%;
+            top: 0;
+            left: -25px;
+            transform: skewY(45deg);
+            transform-origin: top right;
+            opacity: 0.8;
+        }
+        .bar::after {
+            width: 100px;
+            height: 25px;
+            bottom: 100%;
+            left: 0;
+            transform: skewX(45deg);
+            transform-origin: bottom left;
+            opacity: 0.9;
+        }
+        .value {
+            position: absolute;
+            bottom: 100%;
+            width: 100%;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            margin-bottom: 10px;
+            visibility: hidden;
+            transition: visibility 0.5s;
+        }
+        .label {
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-top: 15px;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+            position: absolute;
+            bottom: -25px;
+            width: 100%;
+        }
+        /* Admin modal */
+        #admin-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: #16213e;
+            border-radius: 18px;
+            padding: 2.5rem 3rem;
+            box-shadow: 0 15px 50px #15307b;
+            backdrop-filter: blur(15px);
+            z-index: 100;
+            width: 380px;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        #admin-panel.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        #admin-panel h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 0 10px #2c5bdd;
+        }
+        #admin-panel label {
+            display: block;
+            margin: 0.8rem 0 0.3rem;
+            font-weight: 600;
+            color: #f0e68c;
+        }
+        #admin-panel input[type="number"] {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        #admin-panel input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 10px r#2c5bdd;
+        }
+        #admin-panel .btn-group {
+            margin-top: 2rem;
+            text-align: center;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 90;
+        }
+        #overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        /* Loading screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #16213e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 200;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        #loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #loading-screen .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.2);
+            border-top: 8px solid #dda0dd;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #loading-screen p {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            animation: flicker 1s ease-in-out infinite alternate;
+        }
+        @keyframes flicker {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        /* Winner announcement */
+        #winner-announcement {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: linear-gradient(145deg, #16213e, #9932cc);
+            border-radius: 25px;
+            padding: 3.5rem 4rem;
+            box-shadow: 0 20px 60px #2c5bdd;
+            color: #ffffff;
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-align: center;
+            z-index: 300;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #winner-announcement.active {
+            transform: translate(-50%, -50%) scale(1);
+            animation: winnerPulse 2s ease-in-out infinite alternate;
+        }
+        @keyframes winnerPulse {
+            0% { text-shadow: 0 0 20px #ffffff, 0 0 40px #dd5e89; }
+            100% { text-shadow: 0 0 40px #ffffff, 0 0 60px #f5576c; }
+        }
+        /* Accessibility improvements */
+        @media (max-width: 768px) {
+            #app {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .bar-wrapper {
+                width: 70px;
+            }
+            .bar {
+                width: 70px;
+            }
+            .bar::before {
+                width: 18px;
+                left: -18px;
+            }
+            .bar::after {
+                width: 70px;
+                height: 18px;
+            }
+            #admin-panel {
+                width: 90%;
+                padding: 2rem;
+            }
+            #winner-announcement {
+                font-size: 2rem;
+                padding: 2.5rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="top-left-home"><i class="fas fa-home mr-2"></i> Home</a>
+    <img src="cclogo.png" alt="Logo" class="top-right-logo">
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p>Loading System...</p>
+    </div>
+    <div id="app">
+        <h1>Company Ranking System</h1>
+        <div class="button-container">
+            <button id="open-admin-btn" class="btn" aria-haspopup="dialog" aria-controls="admin-panel">Update Points</button>
+            <button id="finish-btn" class="btn">Finish</button>
+        </div>
+        <div id="graph-container" aria-live="polite" aria-atomic="true" aria-relevant="all" role="region" aria-label="Company ranking bar graph"></div>
+    </div>
+    <div id="overlay"></div>
+    <div id="admin-panel" role="dialog" aria-modal="true" aria-labelledby="admin-title" aria-hidden="true">
+        <h2 id="admin-title">Update Company Points</h2>
+        <form id="admin-form">
+            <label for="company0">Fozta</label>
+            <input type="number" id="company0" name="company0" min="0" max="1000" value="0" required />
+            <label for="company1">Innovexa</label>
+            <input type="number" id="company1" name="company1" min="0" max="1000" value="0" required />
+            <label for="company2">Nexera</label>
+            <input type="number" id="company2" name="company2" min="0" max="1000" value="0" required />
+            <div class="btn-group">
+                <button type="submit" class="btn">Update Values</button>
+                <button type="button" id="close-admin-btn" class="btn">Cancel</button>
+            </div>
+        </form>
+    </div>
+    <div id="winner-announcement" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const companies = [
+                { name: "Fozta", colorClass: "company0" },
+                { name: "Innovexa", colorClass: "company1" },
+                { name: "Nexera", colorClass: "company2" },
+            ];
+            const maxBarHeight = 380;
+            const graphContainer = document.getElementById('graph-container');
+            const adminPanel = document.getElementById('admin-panel');
+            const overlay = document.getElementById('overlay');
+            const openAdminBtn = document.getElementById('open-admin-btn');
+            const closeAdminBtn = document.getElementById('close-admin-btn');
+            const adminForm = document.getElementById('admin-form');
+            const finishBtn = document.getElementById('finish-btn');
+            const winnerAnnouncement = document.getElementById('winner-announcement');
+            const loadingScreen = document.getElementById('loading-screen');
+            const STORAGE_KEY = 'companyPoints';
+            let points = [0,0, 0];
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            function loadPoints() {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    try {
+                        const arr = JSON.parse(stored);
+                        if (Array.isArray(arr) && arr.length === companies.length) {
+                            points = arr.map(p => Math.max(0, Number(p) || 0));
+                            return;
+                        }
+                    } catch {}
+                }
+                points = [0, 0, 0];
+            }
+            function savePoints() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(points));
+            }
+            function createBars() {
+                graphContainer.innerHTML = '';
+                companies.forEach((company, i) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'bar-wrapper';
+                    wrapper.setAttribute('aria-label', `${company.name} score: ${points[i]}`);
+                    const valueLabel = document.createElement('div');
+                    valueLabel.className = 'value';
+                    valueLabel.textContent = points[i];
+                    valueLabel.style.visibility = 'hidden';
+                    wrapper.appendChild(valueLabel);
+                    const bar = document.createElement('div');
+                    bar.className = `bar ${company.colorClass}`;
+                    bar.style.height = '0px';
+                    wrapper.appendChild(bar);
+                    const label = document.createElement('div');
+                    label.className = 'label';
+                    label.textContent = company.name;
+                    wrapper.appendChild(label);
+                    graphContainer.appendChild(wrapper);
+                });
+            }
+            async function animateBars(targetPoints, curiosity = false) {
+                const maxValue = Math.max(...targetPoints, 10);
+                const bars = [...graphContainer.querySelectorAll('.bar')];
+                const values = [...graphContainer.querySelectorAll('.value')];
+                if (curiosity) {
+                    for (let cycle = 0; cycle < 3; cycle++) {
+                        bars.forEach((bar, i) => {
+                            const fullHeight = (targetPoints[i] / maxValue) * maxBarHeight;
+                            const randomFactor = 0.3 + Math.random() * 0.8;
+                            const height = Math.min(maxBarHeight, fullHeight * randomFactor);
+                            bar.style.transition = 'height 0.7s ease-in-out';
+                            bar.style.height = `${height}px`;
+                            values[i].textContent = '';
+                        });
+                        await sleep(700);
+                    }
+                }
+                bars.forEach((bar, i) => {
+                    const targetHeight = (targetPoints[i] / maxValue) * maxBarHeight;
+                    bar.style.transition = 'height 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    bar.style.height = `${targetHeight}px`;
+                    values[i].textContent = targetPoints[i];
+                });
+                await sleep(2100);
+                values.forEach((value, i) => {
+                    value.style.visibility = 'visible';
+                });
+            }
+            async function showLoadingScreen(minMs = 1500) {
+                loadingScreen.classList.remove('hidden');
+                await sleep(minMs);
+                loadingScreen.classList.add('hidden');
+            }
+            function openAdmin() {
+                companies.forEach((_, i) => {
+                    adminForm[`company${i}`].value = points[i];
+                });
+                adminPanel.setAttribute('aria-hidden', 'false');
+                adminPanel.classList.add('active');
+                overlay.classList.add('active');
+                adminForm.querySelector('input').focus();
+            }
+            function closeAdmin() {
+                adminPanel.setAttribute('aria-hidden', 'true');
+                adminPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+            async function updateValues(newPoints) {
+                await showLoadingScreen(1800);
+                await animateBars(points, true);
+                points = newPoints;
+                savePoints();
+                await animateBars(points);
+            }
+            function announceWinner() {
+                const maxPoints = Math.max(...points);
+                const winners = companies.filter((_, i) => points[i] === maxPoints);
+                let winnerText;
+                if (winners.length === 1) {
+                    winnerText = `Winner: ${winners[0].name}!`;
+                } else {
+                    winnerText = `Tie: ${winners.map(w => w.name).join(', ')} share first!`;
+                }
+                winnerAnnouncement.textContent = winnerText;
+                winnerAnnouncement.classList.add('active');
+                setTimeout(() => {
+                    winnerAnnouncement.classList.remove('active');
+                }, 6000);
+            }
+            openAdminBtn.addEventListener('click', openAdmin);
+            closeAdminBtn.addEventListener('click', closeAdmin);
+            overlay.addEventListener('click', closeAdmin);
+            adminForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(adminForm);
+                const newPoints = companies.map((_, i) => {
+                    const val = Number(formData.get(`company${i}`));
+                    return isNaN(val) || val < 0 ? 0 : Math.min(val, 1000);
+                });
+                closeAdmin();
+                await updateValues(newPoints);
+            });
+            finishBtn.addEventListener('click', announceWinner);
+            async function init() {
+                loadPoints();
+                createBars();
+                loadingScreen.classList.add('hidden');
+                await animateBars(points);
+            }
+            init();
+        });
+    </script>
+</body>
+</html>
+</content>
+</create_file>

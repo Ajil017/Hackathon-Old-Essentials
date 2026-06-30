@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Large Dark Blue Timer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body {
+            background-color: #0f172a; /* Dark blue navy */
+            color: #e2e8f0;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling for fixed layout */
+        }
+        .top-right-logo {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 150px;   /* adjust size */
+            height: auto;
+            z-index: 100;  /* stays above other elements */
+        }
+        .top-left-home {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            padding: 10px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .top-left-home:hover {
+            background: rgba(59, 130, 246, 0.8);
+            color: #ffffff;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .timer-display {
+            font-size: 15rem; /* Extremely large for desktop */
+            font-weight: bold;
+            text-align: center;
+            line-height: 0.9;
+            margin: 0 auto;
+            color: #3b82f6; /* Bright blue for contrast */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        .progress-container {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        .progress-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        .input-group {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            z-index: 20;
+        }
+        .input-group input {
+            width: 4rem;
+            padding: 0.5rem;
+            font-size: 1rem;
+            text-align: center;
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            border-radius: 0.375rem;
+        }
+        .button-group {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            z-index: 20;
+        }
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            background-color: #1e40af;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .preset-buttons {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 20;
+        }
+        .preset-buttons button {
+            padding: 0.25rem 0.75rem;
+            font-size: 2rem;
+        }
+        .warning {
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { color: #dc2626; /* Red warning */ }
+            51%, 100% { color: #3b82f6; }
+        }
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 8rem; /* Still large but adjusted for mobile */
+                position: initial;
+                transform: none;
+                margin: 10vh 0 10vh 0;
+            }
+            .progress-container {
+                position: static;
+                width: 90vw;
+                height: 40vh;
+            }
+            .input-group {
+                position: static;
+                margin-top: 2rem;
+            }
+            .button-group {
+                position: static;
+                margin-top: 1rem;
+            }
+            .preset-buttons {
+                position: static;
+                margin-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="top-left-home"><i class="fas fa-home mr-2"></i> Home</a>
+    <img src="cclogo.png" alt="Logo" class="top-right-logo">
+    <div class="progress-container">
+        <svg class="progress-circle" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid meet">
+            <circle cx="400" cy="400" r="350" stroke="#1e293b" stroke-width="50" fill="none"/>
+            <circle id="progress" cx="400" cy="400" r="350" stroke="#3b82f6" stroke-width="50" fill="none" stroke-dasharray="2200" stroke-dashoffset="2200" stroke-linecap="round"/>
+        </svg>
+    </div>
+    <div class="timer-display warning" id="timer">00:00:00</div>
+
+    <div class="input-group">
+        <input type="number" id="hours" min="0" max="23" placeholder="HH">
+        <input type="number" id="minutes" min="0" max="59" placeholder="MM">
+        <input type="number" id="seconds" min="0" max="59" placeholder="SS">
+    </div>
+
+    <div class="button-group">
+        <button id="start">Start</button>
+        <button id="pause">Pause</button>
+        <button id="reset">Reset</button>
+    </div>
+
+    <div class="preset-buttons">
+        <button id="preset25">25:00</button>
+        <button id="preset10">10:00</button>
+        <button id="preset5">05:00</button>
+        <button id="preset1">01:00</button>
+    </div>
+
+    <script>
+        let timerInterval;
+        let totalSeconds = 0;
+        let timeLeft = 0;
+        const timerDisplay = document.getElementById('timer');
+        const progressCircle = document.getElementById('progress');
+        const circumference = 2200; // Adjusted for new radius
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+            const ratio = timeLeft / totalSeconds;
+            progressCircle.style.strokeDashoffset = circumference * (1 - ratio);
+            if (timeLeft <= 10 && timeLeft > 0) {
+                timerDisplay.classList.add('warning');
+            } else {
+                timerDisplay.classList.remove('warning');
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            totalSeconds = timeLeft;
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    alertSound();
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 0;
+            updateDisplay();
+        }
+
+        function setTime() {
+            const hours = +document.getElementById('hours').value || 0;
+            const minutes = +document.getElementById('minutes').value || 0;
+            const seconds = +document.getElementById('seconds').value || 0;
+            timeLeft = hours * 3600 + minutes * 60 + seconds;
+            updateDisplay();
+        }
+
+        function alertSound() {
+            // Simple beep using Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        document.getElementById('start').addEventListener('click', () => {
+            if (timeLeft === 0) setTime();
+            startTimer();
+        });
+        document.getElementById('pause').addEventListener('click', pauseTimer);
+        document.getElementById('reset').addEventListener('click', resetTimer);
+
+        // Preset buttons
+        document.getElementById('preset25').addEventListener('click', () => {
+            document.getElementById('minutes').value = 25;
+            document.getElementById('seconds').value = 0;
+            setTime();
+        });
+        document.getElementById('preset10').addEventListener('click', () => {
+            document.getElementById('minutes').value = 10;
+            setTime();
+        });
+        document.getElementById('preset5').addEventListener('click', () => {
+            document.getElementById('minutes').value = 5;
+            setTime();
+        });
+        document.getElementById('preset1').addEventListener('click', () => {
+            document.getElementById('minutes').value = 1;
+            setTime();
+        });
+
+        // Initialize progress circle
+        progressCircle.style.strokeDasharray = circumference;
+        updateDisplay();
+    </script>
+</body>
+</html>
+</content>
+</create_file>

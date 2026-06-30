@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Options</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #5332ac 100%); 
+            min-height: 100vh; 
+            position: relative; 
+            overflow-x: hidden; 
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(138,43,226,0.5)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="30" cy="30" r="20" fill="url(%23a)"/><circle cx="70" cy="70" r="15" fill="url(%23a)"/><circle cx="50" cy="80" r="10" fill="url(%23a)"/></svg>') no-repeat center center;
+            background-size: 300% 300%;
+            animation: float 20s ease-in-out infinite alternate;
+            opacity: 0.3;
+            z-index: -1;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-50px) rotate(180deg); }
+        }
+        .nav { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px; 
+            background: linear-gradient(45deg, #0f0f23, #1a1a2e); 
+            color: white; 
+            border-radius: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.2); 
+        }
+        .add-card { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(20px); 
+            border-radius: 25px; 
+            padding: 30px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            animation: fadeInUp 0.8s ease-out; 
+        }
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(30px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .option-input { 
+            border-radius: 15px; 
+            padding: 15px; 
+            background: rgba(255,255,255,0.2); 
+            color: white; 
+            border: 2px solid rgba(255,255,255,0.3); 
+            font-size: 1.1rem; 
+        }
+        .option-input::placeholder { color: rgba(255,255,255,0.7); }
+        .add-btn { 
+            background: linear-gradient(45deg, #ffec19, #ff9900, #ff5f00); 
+            color: #000; 
+            padding: 12px 25px; 
+            border-radius: 20px; 
+            transition: all 0.3s; 
+            font-weight: bold; 
+            border: 2px solid #fff; 
+            box-shadow: 0 5px 15px rgba(255,204,0,0.4); 
+        }
+        .add-btn:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(255,204,0,0.6); filter: brightness(1.1); }
+        .option-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: linear-gradient(45deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1)); 
+            padding: 15px; 
+            border-radius: 15px; 
+            margin: 8px 0; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
+            border: 1px solid rgba(255,255,255,0.3); 
+            transition: all 0.3s; 
+        }
+        .option-item:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+        .remove-btn { 
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #dc143c); 
+            color: white; 
+            padding: 8px 16px; 
+            border-radius: 10px; 
+            transition: all 0.2s; 
+            border: 1px solid #fff; 
+        }
+        .remove-btn:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(255,107,107,0.5); }
+        .notif { animation: slideDown 0.5s; }
+        @keyframes slideDown { 
+            from { transform: translateY(-100px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
+    </style>
+</head>
+<body class="text-white">
+         <!-- Static image top-right -->
+    <div class="fixed top-4 right-4 z-50">
+    <img src="cclogo.png" alt="Logo" class="w-20 h-20 object-contain shadow-lg rounded-full border-2 border-white/50">
+    </div>
+    <div class="container mx-auto p-8 max-w-4xl">
+        <div class="nav">
+            <div class="flex gap-4">
+                <a href="index.html" class="flex items-center px-6 py-3 bg-indigo-700 text-white rounded-lg hover:bg-indigo-600 transition transform hover:scale-105 shadow-lg border border-indigo-500/30"><i class="fas fa-home mr-2"></i> Home</a>
+                <a href="wheel.html" class="flex items-center px-6 py-3 bg-white text-indigo-600 rounded-lg hover:bg-gray-200 transition transform hover:scale-105 shadow-lg"><i class="fas fa-arrow-left mr-2"></i> Back to Wheel</a>
+            </div>
+            <h1 class="text-3xl font-bold flex items-center"><i class="fas fa-cogs mr-3 text-yellow-300"></i> Cosmic Option Manager</h1>
+        </div>
+        <div class="add-card">
+            <div class="text-center">
+                <h3 class="text-2xl font-semibold mb-6 text-yellow-200">Craft New Cosmic Options</h3>
+                <div class="flex justify-center mb-6">
+                    <input type="text" id="new-option" class="option-input mr-4 flex-1 max-w-lg" placeholder="Enter a cosmic option name">
+                    <button id="add-option" class="add-btn"><i class="fas fa-plus mr-2"></i>Add to Universe</button>
+                </div>
+                <div id="option-list" class="mt-8">
+                    <!-- Dynamic options will go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const defaultOptions = ['Pizza Party', 'Burger Feast', 'Salad Bowl', 'Ice Cream Cone', 'Cake Slice'];
+        let options = JSON.parse(localStorage.getItem('wheelOptions')) || defaultOptions.slice();
+
+        function updateOptionList() {
+            const list = document.getElementById('option-list');
+            list.innerHTML = '<h3 class="text-xl font-semibold mb-6 text-yellow-200">Galactic Options:</h3>';
+            options.forEach((option, index) => {
+                const item = document.createElement('div');
+                item.className = 'option-item';
+                item.innerHTML = `
+                    <span class="flex-1">${option}</span>
+                    <button class="remove-btn ml-4" onclick="removeOption(${index})"><i class="fas fa-trash mr-1"></i>Remove</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('wheelOptions', JSON.stringify(options));
+        }
+
+        function addOption() {
+            const input = document.getElementById('new-option');
+            const value = input.value.trim();
+            if (value && !options.includes(value)) {
+                options.push(value);
+                input.value = '';
+                saveToStorage();
+                updateOptionList();
+                showNotification('Cosmic option added!', 'success');
+            } else if (value) {
+                showNotification('This star already exists in the universe!', 'error');
+            } else {
+                showNotification('Craft a name for your cosmic option!', 'error');
+            }
+        }
+
+        function removeOption(index) {
+            if (options.length > 1) {
+                options.splice(index, 1);
+                saveToStorage();
+                updateOptionList();
+                showNotification('Option banished from the cosmos!', 'success');
+            } else {
+                showNotification('Cannot banish the last star from the universe!', 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notif = document.createElement('div');
+            notif.className = `fixed top-6 right-6 px-6 py-4 rounded-xl z-50 transition-all duration-500 notif ${type === 'success' ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-2xl' : 'bg-gradient-to-r from-red-400 to-red-600 text-white shadow-2xl'}`;
+            notif.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2"></i>${message}`;
+            document.body.appendChild(notif);
+            setTimeout(() => notif.style.opacity = '0', 4000);
+            setTimeout(() => notif.remove(), 5000);
+        }
+
+        document.getElementById('add-option').addEventListener('click', addOption);
+        document.getElementById('new-option').addEventListener('keypress', e => { if (e.key === 'Enter') addOption(); });
+
+        updateOptionList();
+    </script>
+</body>
+</html>
+</content>
+</create_file>
