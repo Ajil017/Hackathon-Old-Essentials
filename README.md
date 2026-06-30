@@ -7,7 +7,7 @@ Welcome to **CC Hackathon Old Essentials** — the original, lightweight suite o
 > [!NOTE]  
 > This suite was originally built during the initial hackathon phases on **10/09/2025**. It has since been modernized and rewritten. You can find the updated, production-ready version of these tools in my other repository:  
 > 👉 **[Random Picker Repository](https://github.com/Ajil017/Random-picker-.git)**
-
+> 👉 **[Timer Repository](https://github.com/Ajil017/Timer-for-events.git)**
 ---
 
 ## 🚀 Features Included
