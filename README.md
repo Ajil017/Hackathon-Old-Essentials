@@ -29,7 +29,7 @@ An interactive, isometric 3D bar graph visualization for tracking points for hac
 ### 4. ⏱️ Large Timer (`timer.html`)
 A high-visibility fullscreen navy-blue countdown timer with quick-preset options (25m, 10m, 5m, 1m). Features a circular progress bar and automated visual warnings for the final 10 seconds.
 ![Project Preview](./images/old_timer1.png)
-![Project Preview](./images/old_timer12.png)
+![Project Preview](./images/old_timer2.png)
 
 ### 5. 🛠️ Option Manager (`add-options.html`)
 Configuration utility to add or remove options from the picker wheel pool, persisting choices inside browser `localStorage`.
