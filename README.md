@@ -16,18 +16,24 @@ The suite is comprised of the following tools:
 
 ### 1. 🎛️ Central Portal (`index.html`)
 A responsive, modern dashboard with a glassmorphic layout, glowing hover indicators, and animated background particles. This serves as the central hub to access all files.
+![Project Preview](./images/old_home.png)
 
 ### 2. 🎡 Spin the Wheel (`wheel.html`)
 An animated picker wheel used to select groups or individuals at random. It reads configuration from local storage and features interactive particle feedback on selection.
+![Project Preview](./images/old_wheel.png)
 
 ### 3. 📊 3D Company Ranking (`cc rank.html`)
 An interactive, isometric 3D bar graph visualization for tracking points for hackathon teams (**Fozta**, **Innovexa**, and **Nexera**). Includes an admin control modal to adjust points dynamically.
+![Project Preview](./images/old_rank.png)
 
 ### 4. ⏱️ Large Timer (`timer.html`)
 A high-visibility fullscreen navy-blue countdown timer with quick-preset options (25m, 10m, 5m, 1m). Features a circular progress bar and automated visual warnings for the final 10 seconds.
+![Project Preview](./images/old_timer1.png)
+![Project Preview](./images/old_timer12.png)
 
 ### 5. 🛠️ Option Manager (`add-options.html`)
 Configuration utility to add or remove options from the picker wheel pool, persisting choices inside browser `localStorage`.
+![Project Preview](./images/old_manage.png)
 
 ---
 
